@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora CIMENZO</title>
+    <meta name="theme-color" content="#d4af37">
+    <meta name="description" content="Calculadora profissional para traço de concreto - Revestimento Cimentício">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%23d4af37' width='192' height='192'/><text x='96' y='110' font-size='80' font-weight='bold' text-anchor='middle' fill='%231f4e78' font-family='Arial'>C</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%23d4af37' width='192' height='192'/><text x='96' y='110' font-size='80' font-weight='bold' text-anchor='middle' fill='%231f4e78' font-family='Arial'>C</text></svg>">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #d3d3d3;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            background: white;
+            padding: 0;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header-image {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .main-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: white;
+            padding: 10px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .main-tab-btn {
+            padding: 12px 25px;
+            background: #f0f0f0;
+            border: 2px solid transparent;
+            border-radius: 6px;
+            color: #333;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1em;
+        }
+
+        .main-tab-btn.active {
+            background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%);
+            color: white;
+            border-color: #d4af37;
+        }
+
+        .main-tab-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .main-tab-content {
+            display: none;
+        }
+
+        .main-tab-content.active {
+            display: block;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .main-content.centered {
+            grid-template-columns: 1fr;
+            max-width: 600px;
+            margin: 0 auto 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h2 {
+            color: #1f4e78;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            border-bottom: 3px solid #d4af37;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #d4af37;
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+        }
+
+        .input-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            flex: 1;
+            min-width: 120px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(212, 175, 55, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .btn-print {
+            background: #1f4e78;
+            color: white;
+        }
+
+        .btn-print:hover {
+            background: #163a5c;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(31, 78, 120, 0.4);
+        }
+
+        .btn-save {
+            background: #2d7a3e;
+            color: white;
+        }
+
+        .btn-save:hover {
+            background: #235c31;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(45, 122, 62, 0.4);
+        }
+
+        .btn-export {
+            background: #0066cc;
+            color: white;
+        }
+
+        .btn-export:hover {
+            background: #0052a3;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 102, 204, 0.4);
+        }
+
+        .results-section {
+            grid-column: 1 / -1;
+        }
+
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .results-table thead {
+            background: #1f4e78;
+            color: white;
+        }
+
+        .results-table th {
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .results-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .results-table tbody tr:hover {
+            background: #f5f5f5;
+        }
+
+        .results-table tbody tr:nth-child(even) {
+            background: #fafafa;
+        }
+
+        .total-row {
+            background: #1f4e78 !important;
+            color: white;
+            font-weight: bold;
+        }
+
+        .total-row td {
+            border: none;
+        }
+
+        .price-section {
+            background: #f9f9f9;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .price-section h3 {
+            color: #1f4e78;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .price-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .price-item {
+            background: white;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .price-item label {
+            margin-bottom: 6px;
+            font-size: 0.9em;
+        }
+
+        .price-item input {
+            margin-bottom: 0;
+        }
+
+        .summary {
+            background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .summary-item {
+            display: inline-block;
+            margin: 10px 20px;
+        }
+
+        .summary-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .summary-value {
+            font-size: 1.8em;
+            font-weight: bold;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .tab-btn {
+            padding: 12px 20px;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            color: #666;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            color: #d4af37;
+            border-bottom-color: #d4af37;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .config-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .base-data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .base-data-table thead {
+            background: #1f4e78;
+            color: white;
+        }
+
+        .base-data-table th {
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .base-data-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .base-data-table tbody tr:nth-child(even) {
+            background: #fafafa;
+        }
+
+        .base-data-table input {
+            width: 100%;
+            padding: 6px;
+            border: 1px solid #d4af37;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .config-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .input-group {
+                grid-template-columns: 1fr;
+            }
+
+            .results-table {
+                font-size: 0.9em;
+            }
+
+            .results-table th,
+            .results-table td {
+                padding: 8px;
+            }
+
+            .price-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .summary-item {
+                display: block;
+                margin: 10px 0;
+            }
+
+            button {
+                min-width: 100px;
+                padding: 10px 15px;
+                font-size: 0.9em;
+            }
+
+            .main-tabs {
+                flex-direction: column;
+            }
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            border-left: 4px solid #c33;
+        }
+
+        .success {
+            background: #efe;
+            color: #3c3;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            border-left: 4px solid #3c3;
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+
+            .main-tabs,
+            .button-group,
+            .action-buttons,
+            .price-section,
+            .config-grid {
+                display: none;
+            }
+
+            .card {
+                box-shadow: none;
+                page-break-inside: avoid;
+            }
+        }
+
+        .info-box {
+            background: #e8f4f8;
+            border-left: 4px solid #1f4e78;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <img src="header.png" alt="Calculadora de Traços CIMENZO" class="header-image">
+        </header>
+
+        <!-- Abas Principais -->
+        <div class="main-tabs">
+            <button class="main-tab-btn active" onclick="mostrarAbaMain('calculadora')">📊 Calculadora</button>
+            <button class="main-tab-btn" onclick="mostrarAbaMain('configuracoes')">⚙️ Configurações</button>
+        </div>
+
+        <!-- ABA 1: CALCULADORA -->
+        <div id="calculadora" class="main-tab-content active">
+            <div class="main-content centered">
+                <!-- Seção de Entrada de Dados (Centralizada) -->
+                <div class="card">
+                    <h2>Entrada de Dados</h2>
+                    
+                    <div class="info-box">
+                        Preencha os campos abaixo para calcular o traço de concreto ideal para sua peça.
+                    </div>
+
+                    <div class="form-group">
+                        <label for="aplicacao">Tipo de Aplicação *</label>
+                        <select id="aplicacao" onchange="calcular()">
+                            <option value="">Selecione uma aplicação...</option>
+                            <option value="revestimento">Revestimento 3D / Painéis Finos</option>
+                            <option value="cubas">Cubas / Peças Decorativas</option>
+                            <option value="pisos">Pisos e Bordas de Piscina</option>
+                            <option value="uhpc">UHPC Leve (Peças Premium)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="tipoCimento">Tipo de Cimento *</label>
+                        <select id="tipoCimento" onchange="calcular()">
+                            <option value="cp5">Cimento CP5</option>
+                            <option value="branco">Cimento Branco</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="pesoCimento">Peso do Cimento (kg) *</label>
+                        <input type="number" id="pesoCimento" value="1" min="0.1" step="0.1" onchange="calcular()" oninput="calcular()">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="pigmentacao">Pigmentação Personalizada (%) *</label>
+                        <input type="number" id="pigmentacao" value="5" min="0" step="0.5" onchange="calcular()" oninput="calcular()">
+                        <small style="color: #666; margin-top: 5px; display: block;">% sobre o peso do cimento</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="maoDeObra">Preço de Mão de Obra (R$) *</label>
+                        <input type="number" id="maoDeObra" value="0" min="0" step="0.01" onchange="calcular()" oninput="calcular()">
+                        <small style="color: #666; margin-top: 5px; display: block;">Valor a ser adicionado ao custo total</small>
+                    </div>
+
+                    <div class="button-group">
+                        <button class="btn-primary" onclick="resetarFormulario()">Limpar Dados</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="main-content">
+                <!-- Seção de Resultados -->
+                <div class="card results-section">
+                    <h2>Resultados do Cálculo</h2>
+                    
+                    <div class="tabs">
+                        <button class="tab-btn active" onclick="mostrarAba('resultados')">Resultados</button>
+                        <button class="tab-btn" onclick="mostrarAba('resumo')">Resumo de Custos</button>
+                    </div>
+
+                    <div id="resultados" class="tab-content active">
+                        <table class="results-table">
+                            <thead>
+                                <tr>
+                                    <th>Componente</th>
+                                    <th>Quantidade</th>
+                                    <th>Unidade</th>
+                                    <th>Preço Unit. (R$)</th>
+                                    <th>Custo Total (R$)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="resultadosBody">
+                                <tr>
+                                    <td colspan="5" style="text-align: center; color: #999;">Selecione uma aplicação para ver os resultados</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div id="resumo" class="tab-content">
+                        <div class="summary">
+                            <div class="summary-item">
+                                <div class="summary-label">Custo de Materiais</div>
+                                <div class="summary-value" id="custoMateriais">R$ 0,00</div>
+                            </div>
+                            <div class="summary-item">
+                                <div class="summary-label">Mão de Obra</div>
+                                <div class="summary-value" id="custoMaoDeObra">R$ 0,00</div>
+                            </div>
+                            <div class="summary-item">
+                                <div class="summary-label">Custo Total</div>
+                                <div class="summary-value" id="custoTotal">R$ 0,00</div>
+                            </div>
+                        </div>
+                        <div class="summary" style="background: #1f4e78; margin-top: 15px;">
+                            <div class="summary-item">
+                                <div class="summary-label">Peso Total (kg)</div>
+                                <div class="summary-value" id="pesoTotal">0 kg</div>
+                            </div>
+                            <div class="summary-item">
+                                <div class="summary-label">Custo por kg</div>
+                                <div class="summary-value" id="custoPorKg">R$ 0,00</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="btn-save" onclick="salvarTraco()">💾 Salvar Traço (PDF)</button>
+                        <button class="btn-print" onclick="imprimirTraco()">🖨️ Imprimir</button>
+                        <button class="btn-export" onclick="exportarExcel()">📊 Exportar Excel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ABA 2: CONFIGURAÇÕES -->
+        <div id="configuracoes" class="main-tab-content">
+            <div class="config-grid">
+                <!-- Dados Base -->
+                <div class="card">
+                    <h2>Dados Base - Proporções</h2>
+                    <div class="info-box">
+                        Edite as proporções dos componentes para cada tipo de aplicação. Os valores são multiplicados pelo peso do cimento.
+                    </div>
+                    <table class="base-data-table">
+                        <thead>
+                            <tr>
+                                <th>Aplicação</th>
+                                <th>Componente</th>
+                                <th>Proporção</th>
+                            </tr>
+                        </thead>
+                        <tbody id="baseDataBody">
+                        </tbody>
+                    </table>
+                    <div class="button-group" style="margin-top: 15px;">
+                        <button class="btn-primary" onclick="salvarDadosBase()">Salvar Proporções</button>
+                        <button class="btn-secondary" onclick="resetarDadosBase()">Restaurar Padrão</button>
+                    </div>
+                </div>
+
+                <!-- Preços -->
+                <div class="card">
+                    <h2>Tabela de Preços</h2>
+                    <div class="info-box">
+                        Insira os preços unitários de cada material. Estes valores serão usados para calcular o custo total.
+                    </div>
+                    <div class="price-section">
+                        <div class="price-grid" id="priceGrid"></div>
+                    </div>
+                    <div class="button-group">
+                        <button class="btn-primary" onclick="salvarPrecos()">Salvar Preços</button>
+                        <button class="btn-secondary" onclick="resetarPrecos()">Restaurar Padrão</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dados base das proporções
+        let proporcoes = {
+            revestimento: {
+                nome: "Revestimento 3D / Painéis Finos",
+                areia: 2.5,
+                pedrisco: 0,
+                silica: 60,
+                dioxido: 40,
+                pigmento: 50,
+                microfibra: 12,
+                superplast: 20,
+                incorporador: 3,
+                impermeab: 20,
+                agua: 320
+            },
+            cubas: {
+                nome: "Cubas / Peças Decorativas",
+                areia: 2,
+                pedrisco: 1,
+                silica: 60,
+                dioxido: 40,
+                pigmento: 50,
+                microfibra: 12,
+                superplast: 22,
+                incorporador: 4,
+                impermeab: 20,
+                agua: 330
+            },
+            pisos: {
+                nome: "Pisos e Bordas de Piscina",
+                areia: 2,
+                pedrisco: 1.5,
+                silica: 70,
+                dioxido: 30,
+                pigmento: 40,
+                microfibra: 15,
+                superplast: 25,
+                incorporador: 4,
+                impermeab: 30,
+                agua: 340
+            },
+            uhpc: {
+                nome: "UHPC Leve (Peças Premium)",
+                areia: 1.8,
+                pedrisco: 0.5,
+                silica: 90,
+                dioxido: 40,
+                pigmento: 40,
+                microfibra: 18,
+                superplast: 28,
+                incorporador: 2,
+                impermeab: 20,
+                agua: 300
+            }
+        };
+
+        const proporcoesPadrao = JSON.parse(JSON.stringify(proporcoes));
+
+        // Componentes para edição
+        const componentes = [
+            'areia', 'pedrisco', 'silica', 'dioxido', 'pigmento', 
+            'microfibra', 'superplast', 'incorporador', 'impermeab', 'agua'
+        ];
+
+        const componentesNomes = {
+            areia: 'Areia (kg)',
+            pedrisco: 'Pedrisco Fino (kg)',
+            silica: 'Sílica Ativa (g)',
+            dioxido: 'Dióxido de Titânio (g)',
+            pigmento: 'Pigmento (g)',
+            microfibra: 'Microfibra (g)',
+            superplast: 'Superplastificante (ml)',
+            incorporador: 'Incorporador de Ar (ml)',
+            impermeab: 'Impermeabilizante (ml)',
+            agua: 'Água (ml)'
+        };
+
+        // Materiais para preços
+        const materiais = [
+            { id: 'cimentocp5', nome: 'Cimento CP5', unidade: 'kg' },
+            { id: 'cimentobranco', nome: 'Cimento Branco', unidade: 'kg' },
+            { id: 'areia', nome: 'Areia', unidade: 'kg' },
+            { id: 'pedrisco', nome: 'Pedrisco Fino', unidade: 'kg' },
+            { id: 'silica', nome: 'Sílica Ativa', unidade: 'g' },
+            { id: 'dioxido', nome: 'Dióxido de Titânio', unidade: 'g' },
+            { id: 'pigmento', nome: 'Pigmento', unidade: 'g' },
+            { id: 'microfibra', nome: 'Microfibra', unidade: 'g' },
+            { id: 'superplast', nome: 'Superplastificante', unidade: 'ml' },
+            { id: 'incorporador', nome: 'Incorporador de Ar', unidade: 'ml' },
+            { id: 'impermeab', nome: 'Impermeabilizante', unidade: 'ml' },
+            { id: 'agua', nome: 'Água', unidade: 'ml' }
+        ];
+
+        // Preços padrão
+        const precosDefault = {
+            cimentocp5: 1.50,
+            cimentobranco: 2.50,
+            areia: 0.20,
+            pedrisco: 0.25,
+            silica: 0.01,
+            dioxido: 0.05,
+            pigmento: 0.08,
+            microfibra: 0.10,
+            superplast: 0.05,
+            incorporador: 0.03,
+            impermeab: 0.04,
+            agua: 0.00
+        };
+
+        let ultimosResultados = [];
+
+        // Carregar dados base do localStorage
+        function carregarDadosBase() {
+            const dadosSalvos = localStorage.getItem('dadosBaseConcreto');
+            if (dadosSalvos) {
+                proporcoes = JSON.parse(dadosSalvos);
+            }
+        }
+
+        // Salvar dados base no localStorage
+        function salvarDadosBase() {
+            const aplicacoes = ['revestimento', 'cubas', 'pisos', 'uhpc'];
+            
+            aplicacoes.forEach(app => {
+                componentes.forEach(comp => {
+                    const input = document.getElementById(`prop-${app}-${comp}`);
+                    if (input) {
+                        proporcoes[app][comp] = parseFloat(input.value) || 0;
+                    }
+                });
+            });
+
+            localStorage.setItem('dadosBaseConcreto', JSON.stringify(proporcoes));
+            alert('Proporções salvas com sucesso!');
+            calcular();
+        }
+
+        // Resetar dados base
+        function resetarDadosBase() {
+            if (confirm('Tem certeza que deseja restaurar as proporções padrão?')) {
+                proporcoes = JSON.parse(JSON.stringify(proporcoesPadrao));
+                localStorage.removeItem('dadosBaseConcreto');
+                renderizarDadosBase();
+                calcular();
+            }
+        }
+
+        // Renderizar tabela de dados base
+        function renderizarDadosBase() {
+            const tbody = document.getElementById('baseDataBody');
+            tbody.innerHTML = '';
+
+            const aplicacoes = ['revestimento', 'cubas', 'pisos', 'uhpc'];
+
+            aplicacoes.forEach(app => {
+                const prop = proporcoes[app];
+                componentes.forEach(comp => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${prop.nome}</td>
+                        <td>${componentesNomes[comp]}</td>
+                        <td><input type="number" id="prop-${app}-${comp}" value="${prop[comp]}" step="0.1" min="0"></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            });
+        }
+
+        // Carregar preços do localStorage
+        function carregarPrecos() {
+            const precosSalvos = localStorage.getItem('precosConcreto');
+            return precosSalvos ? JSON.parse(precosSalvos) : precosDefault;
+        }
+
+        // Salvar preços no localStorage
+        function salvarPrecos() {
+            const precos = {};
+            materiais.forEach(mat => {
+                const input = document.getElementById(`preco-${mat.id}`);
+                precos[mat.id] = parseFloat(input.value) || 0;
+            });
+            localStorage.setItem('precosConcreto', JSON.stringify(precos));
+            alert('Preços salvos com sucesso!');
+            calcular();
+        }
+
+        // Resetar preços
+        function resetarPrecos() {
+            if (confirm('Tem certeza que deseja restaurar os preços padrão?')) {
+                localStorage.removeItem('precosConcreto');
+                renderizarPrecos();
+                calcular();
+            }
+        }
+
+        // Renderizar grid de preços
+        function renderizarPrecos() {
+            const precos = carregarPrecos();
+            const grid = document.getElementById('priceGrid');
+            grid.innerHTML = '';
+
+            materiais.forEach(mat => {
+                const preco = precos[mat.id] || 0;
+                const div = document.createElement('div');
+                div.className = 'price-item';
+                div.innerHTML = `
+                    <label>${mat.nome} (${mat.unidade})</label>
+                    <input type="number" id="preco-${mat.id}" value="${preco}" min="0" step="0.01" placeholder="0.00">
+                `;
+                grid.appendChild(div);
+            });
+        }
+
+        // Calcular traço
+        function calcular() {
+            const aplicacao = document.getElementById('aplicacao').value;
+            const tipoCimento = document.getElementById('tipoCimento').value;
+            const pesoCimento = parseFloat(document.getElementById('pesoCimento').value) || 0;
+            const pigmentacao = parseFloat(document.getElementById('pigmentacao').value) || 0;
+            const maoDeObra = parseFloat(document.getElementById('maoDeObra').value) || 0;
+
+            if (!aplicacao || pesoCimento <= 0) {
+                document.getElementById('resultadosBody').innerHTML = 
+                    '<tr><td colspan="5" style="text-align: center; color: #999;">Selecione uma aplicação e insira um peso válido</td></tr>';
+                return;
+            }
+
+            const prop = proporcoes[aplicacao];
+            const precos = carregarPrecos();
+
+            // Calcular quantidades
+            const resultados = [
+                {
+                    nome: tipoCimento === 'cp5' ? 'Cimento CP5' : 'Cimento Branco',
+                    quantidade: pesoCimento,
+                    unidade: 'kg',
+                    precoId: tipoCimento === 'cp5' ? 'cimentocp5' : 'cimentobranco'
+                },
+                {
+                    nome: 'Areia',
+                    quantidade: prop.areia * pesoCimento,
+                    unidade: 'kg',
+                    precoId: 'areia'
+                },
+                {
+                    nome: 'Pedrisco Fino',
+                    quantidade: prop.pedrisco * pesoCimento,
+                    unidade: 'kg',
+                    precoId: 'pedrisco'
+                },
+                {
+                    nome: 'Sílica Ativa',
+                    quantidade: prop.silica * pesoCimento,
+                    unidade: 'g',
+                    precoId: 'silica'
+                },
+                {
+                    nome: 'Dióxido de Titânio',
+                    quantidade: prop.dioxido * pesoCimento,
+                    unidade: 'g',
+                    precoId: 'dioxido'
+                },
+                {
+                    nome: 'Pigmento',
+                    quantidade: (pigmentacao * 10) * pesoCimento,
+                    unidade: 'g',
+                    precoId: 'pigmento'
+                },
+                {
+                    nome: 'Microfibra',
+                    quantidade: prop.microfibra * pesoCimento,
+                    unidade: 'g',
+                    precoId: 'microfibra'
+                },
+                {
+                    nome: 'Superplastificante',
+                    quantidade: prop.superplast * pesoCimento,
+                    unidade: 'ml',
+                    precoId: 'superplast'
+                },
+                {
+                    nome: 'Incorporador de Ar',
+                    quantidade: prop.incorporador * pesoCimento,
+                    unidade: 'ml',
+                    precoId: 'incorporador'
+                },
+                {
+                    nome: 'Impermeabilizante',
+                    quantidade: prop.impermeab * pesoCimento,
+                    unidade: 'ml',
+                    precoId: 'impermeab'
+                },
+                {
+                    nome: 'Água',
+                    quantidade: prop.agua * pesoCimento,
+                    unidade: 'ml',
+                    precoId: 'agua'
+                }
+            ];
+
+            ultimosResultados = resultados;
+
+            // Renderizar tabela
+            let html = '';
+            let custoTotal = 0;
+            let pesoTotal = 0;
+
+            resultados.forEach(item => {
+                const preco = precos[item.precoId] || 0;
+                const custo = item.quantidade * preco;
+                custoTotal += custo;
+                
+                if (item.unidade === 'kg') {
+                    pesoTotal += item.quantidade;
+                }
+
+                html += `
+                    <tr>
+                        <td>${item.nome}</td>
+                        <td>${item.quantidade.toFixed(2)}</td>
+                        <td>${item.unidade}</td>
+                        <td>R$ ${preco.toFixed(2)}</td>
+                        <td>R$ ${custo.toFixed(2)}</td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                <tr class="total-row">
+                    <td colspan="3">TOTAL DE MATERIAIS</td>
+                    <td></td>
+                    <td>R$ ${custoTotal.toFixed(2)}</td>
+                </tr>
+            `;
+
+            document.getElementById('resultadosBody').innerHTML = html;
+
+            // Atualizar resumo
+            const custoTotalComMaoDeObra = custoTotal + maoDeObra;
+            document.getElementById('custoMateriais').textContent = `R$ ${custoTotal.toFixed(2)}`;
+            document.getElementById('custoMaoDeObra').textContent = `R$ ${maoDeObra.toFixed(2)}`;
+            document.getElementById('custoTotal').textContent = `R$ ${custoTotalComMaoDeObra.toFixed(2)}`;
+            document.getElementById('pesoTotal').textContent = `${pesoTotal.toFixed(2)} kg`;
+            document.getElementById('custoPorKg').textContent = pesoTotal > 0 ? `R$ ${(custoTotalComMaoDeObra / pesoTotal).toFixed(2)}` : 'R$ 0,00';
+        }
+
+        // Resetar formulário
+        function resetarFormulario() {
+            document.getElementById('aplicacao').value = '';
+            document.getElementById('tipoCimento').value = 'cp5';
+            document.getElementById('pesoCimento').value = '1';
+            document.getElementById('pigmentacao').value = '5';
+            document.getElementById('maoDeObra').value = '0';
+            calcular();
+        }
+
+        // Mostrar aba principal
+        function mostrarAbaMain(abaId) {
+            document.querySelectorAll('.main-tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.main-tab-btn').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(abaId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Mostrar aba secundária
+        function mostrarAba(abaId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(abaId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Salvar traço em PDF
+        function salvarTraco() {
+            const aplicacao = document.getElementById('aplicacao').value;
+
+            if (!aplicacao) {
+                alert('Por favor, selecione uma aplicação antes de salvar!');
+                return;
+            }
+
+            const elemento = document.querySelector('.results-section');
+            const opt = {
+                margin: 10,
+                filename: `Traco_Concreto_CIMENZO_${new Date().toISOString().slice(0, 10)}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
+            };
+
+            html2pdf().set(opt).from(elemento).save();
+        }
+
+        // Imprimir traço
+        function imprimirTraco() {
+            const aplicacao = document.getElementById('aplicacao').value;
+
+            if (!aplicacao) {
+                alert('Por favor, selecione uma aplicação antes de imprimir!');
+                return;
+            }
+
+            window.print();
+        }
+
+        // Exportar para Excel
+        function exportarExcel() {
+            const aplicacao = document.getElementById('aplicacao').value;
+            const tipoCimento = document.getElementById('tipoCimento').value;
+            const pesoCimento = document.getElementById('pesoCimento').value;
+            const pigmentacao = document.getElementById('pigmentacao').value;
+            const maoDeObra = document.getElementById('maoDeObra').value;
+
+            if (!aplicacao) {
+                alert('Por favor, selecione uma aplicação antes de exportar!');
+                return;
+            }
+
+            // Preparar dados
+            const dados = [];
+            dados.push(['CALCULADORA DE TRAÇO DE CONCRETO - CIMENZO']);
+            dados.push(['']);
+            dados.push(['Informações da Peça']);
+            dados.push(['Aplicação', proporcoes[aplicacao].nome]);
+            dados.push(['Tipo de Cimento', tipoCimento === 'cp5' ? 'Cimento CP5' : 'Cimento Branco']);
+            dados.push(['Peso do Cimento (kg)', pesoCimento]);
+            dados.push(['Pigmentação (%)', pigmentacao]);
+            dados.push(['Preço de Mão de Obra (R$)', maoDeObra]);
+            dados.push(['']);
+            dados.push(['Componente', 'Quantidade', 'Unidade', 'Preço Unit. (R$)', 'Custo Total (R$)']);
+
+            // Adicionar resultados
+            const precos = carregarPrecos();
+            let custoTotal = 0;
+
+            ultimosResultados.forEach(item => {
+                const preco = precos[item.precoId] || 0;
+                const custo = item.quantidade * preco;
+                custoTotal += custo;
+                dados.push([item.nome, item.quantidade.toFixed(2), item.unidade, preco.toFixed(2), custo.toFixed(2)]);
+            });
+
+            dados.push(['TOTAL DE MATERIAIS', '', '', '', custoTotal.toFixed(2)]);
+            dados.push(['Mão de Obra', '', '', '', maoDeObra]);
+            dados.push(['CUSTO TOTAL', '', '', '', (custoTotal + parseFloat(maoDeObra)).toFixed(2)]);
+
+            // Criar workbook
+            const ws = XLSX.utils.aoa_to_sheet(dados);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Traço');
+
+            // Salvar arquivo
+            XLSX.writeFile(wb, `Traco_Concreto_CIMENZO_${new Date().toISOString().slice(0, 10)}.xlsx`);
+        }
+
+        // Registrar Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Erro ao registrar Service Worker:', error);
+                    });
+            });
+        }
+
+        // Inicializar
+        window.addEventListener('load', () => {
+            carregarDadosBase();
+            renderizarDadosBase();
+            renderizarPrecos();
+            calcular();
+        });
+    </script>
+</body>
+</html>
