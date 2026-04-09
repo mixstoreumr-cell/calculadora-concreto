@@ -1052,16 +1052,34 @@
                 return;
             }
 
-            const elemento = document.querySelector('.results-section');
-            const opt = {
-                margin: 10,
-                filename: `Traco_Concreto_CIMENZO_${new Date().toISOString().slice(0, 10)}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2 },
-                jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
-            };
+            try {
+                // Procurar pelo elemento de resultados
+                let elemento = document.querySelector('.results-section');
+                if (!elemento) {
+                    elemento = document.querySelector('table');
+                }
+                if (!elemento) {
+                    elemento = document.querySelector('.main-content');
+                }
+                
+                if (!elemento) {
+                    alert('Nenhum resultado para salvar. Faça um cálculo primeiro!');
+                    return;
+                }
 
-            html2pdf().set(opt).from(elemento).save();
+                const opt = {
+                    margin: 10,
+                    filename: `Traco_Concreto_CIMENZO_${new Date().toISOString().slice(0, 10)}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2 },
+                    jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
+                };
+
+                html2pdf().set(opt).from(elemento).save();
+            } catch (erro) {
+                console.error('Erro ao salvar PDF:', erro);
+                alert('Erro ao salvar PDF. Tente novamente.');
+            }
         }
 
         // Imprimir traço
@@ -1073,7 +1091,12 @@
                 return;
             }
 
-            window.print();
+            try {
+                window.print();
+            } catch (erro) {
+                console.error('Erro ao imprimir:', erro);
+                alert('Erro ao imprimir. Tente novamente.');
+            }
         }
 
         // Exportar para Excel
@@ -1089,41 +1112,51 @@
                 return;
             }
 
-            // Preparar dados
-            const dados = [];
-            dados.push(['CALCULADORA DE TRAÇO DE CONCRETO - CIMENZO']);
-            dados.push(['']);
-            dados.push(['Informações da Peça']);
-            dados.push(['Aplicação', proporcoes[aplicacao].nome]);
-            dados.push(['Tipo de Cimento', tipoCimento === 'cp5' ? 'Cimento CP5' : 'Cimento Branco']);
-            dados.push(['Peso do Cimento (kg)', pesoCimento]);
-            dados.push(['Pigmentação (%)', pigmentacao]);
-            dados.push(['Preço de Mão de Obra (R$)', maoDeObra]);
-            dados.push(['']);
-            dados.push(['Componente', 'Quantidade', 'Unidade', 'Preço Unit. (R$)', 'Custo Total (R$)']);
+            try {
+                // Preparar dados
+                const dados = [];
+                dados.push(['CALCULADORA DE TRAÇO DE CONCRETO - CIMENZO']);
+                dados.push(['']);
+                dados.push(['Informações da Peça']);
+                dados.push(['Aplicação', proporcoes[aplicacao].nome]);
+                dados.push(['Tipo de Cimento', tipoCimento === 'cp5' ? 'Cimento CP5' : 'Cimento Branco']);
+                dados.push(['Peso do Cimento (kg)', pesoCimento]);
+                dados.push(['Pigmentação (%)', pigmentacao]);
+                dados.push(['Preço de Mão de Obra (R$)', maoDeObra]);
+                dados.push(['']);
+                dados.push(['Componente', 'Quantidade', 'Unidade', 'Preço Unit. (R$)', 'Custo Total (R$)']);
 
-            // Adicionar resultados
-            const precos = carregarPrecos();
-            let custoTotal = 0;
+                // Adicionar resultados
+                const precos = carregarPrecos();
+                let custoTotal = 0;
 
-            ultimosResultados.forEach(item => {
-                const preco = precos[item.precoId] || 0;
-                const custo = item.quantidade * preco;
-                custoTotal += custo;
-                dados.push([item.nome, item.quantidade.toFixed(2), item.unidade, preco.toFixed(2), custo.toFixed(2)]);
-            });
+                if (ultimosResultados && ultimosResultados.length > 0) {
+                    ultimosResultados.forEach(item => {
+                        const preco = precos[item.precoId] || 0;
+                        const custo = item.quantidade * preco;
+                        custoTotal += custo;
+                        dados.push([item.nome, item.quantidade.toFixed(2), item.unidade, preco.toFixed(2), custo.toFixed(2)]);
+                    });
+                } else {
+                    alert('Nenhum resultado para exportar. Faça um cálculo primeiro!');
+                    return;
+                }
 
-            dados.push(['TOTAL DE MATERIAIS', '', '', '', custoTotal.toFixed(2)]);
-            dados.push(['Mão de Obra', '', '', '', maoDeObra]);
-            dados.push(['CUSTO TOTAL', '', '', '', (custoTotal + parseFloat(maoDeObra)).toFixed(2)]);
+                dados.push(['TOTAL DE MATERIAIS', '', '', '', custoTotal.toFixed(2)]);
+                dados.push(['Mão de Obra', '', '', '', maoDeObra]);
+                dados.push(['CUSTO TOTAL', '', '', '', (custoTotal + parseFloat(maoDeObra)).toFixed(2)]);
 
-            // Criar workbook
-            const ws = XLSX.utils.aoa_to_sheet(dados);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, 'Traço');
+                // Criar workbook
+                const ws = XLSX.utils.aoa_to_sheet(dados);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, 'Traço');
 
-            // Salvar arquivo
-            XLSX.writeFile(wb, `Traco_Concreto_CIMENZO_${new Date().toISOString().slice(0, 10)}.xlsx`);
+                // Salvar arquivo
+                XLSX.writeFile(wb, `Traco_Concreto_CIMENZO_${new Date().toISOString().slice(0, 10)}.xlsx`);
+            } catch (erro) {
+                console.error('Erro ao exportar Excel:', erro);
+                alert('Erro ao exportar Excel. Tente novamente.');
+            }
         }
 
         // Registrar Service Worker
