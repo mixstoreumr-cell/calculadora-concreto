@@ -26,8 +26,10 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 100%;
+            width: 100%;
             margin: 0 auto;
+            padding: 0 20px;
         }
 
         header {
@@ -1128,16 +1130,26 @@
                 
                 const element = document.createElement('div');
                 element.innerHTML = htmlContent;
+                element.style.backgroundColor = 'white';
+                element.style.padding = '20px';
+                
+                document.body.appendChild(element);
                 
                 const opt = {
-                    margin: 10,
+                    margin: [10, 10, 10, 10],
                     filename: `Traco_Concreto_CIMENZO_${new Date().toISOString().slice(0, 10)}.pdf`,
                     image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { scale: 2, useCORS: true, logging: false },
+                    html2canvas: { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff' },
                     jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
                 };
 
-                html2pdf().set(opt).from(element).save();
+                html2pdf().set(opt).from(element).save().then(() => {
+                    document.body.removeChild(element);
+                }).catch(() => {
+                    if (document.body.contains(element)) {
+                        document.body.removeChild(element);
+                    }
+                });
             } catch (erro) {
                 console.error('Erro ao salvar PDF:', erro);
                 alert('Erro ao salvar PDF. Tente novamente.');
