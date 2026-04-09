@@ -1053,59 +1053,87 @@
             }
 
             try {
-                // Criar um elemento temporário com os dados
-                const elemento = document.createElement('div');
-                elemento.style.padding = '20px';
-                elemento.style.backgroundColor = 'white';
-                
-                // Adicionar título
-                const titulo = document.createElement('h1');
-                titulo.textContent = 'Calculadora de Traço de Concreto CIMENZO';
-                titulo.style.textAlign = 'center';
-                titulo.style.marginBottom = '20px';
-                elemento.appendChild(titulo);
-                
-                // Adicionar informações
-                const info = document.createElement('div');
-                info.style.marginBottom = '20px';
-                info.innerHTML = `
-                    <p><strong>Aplicação:</strong> ${proporcoes[aplicacao].nome}</p>
-                    <p><strong>Tipo de Cimento:</strong> ${document.getElementById('tipoCimento').value === 'cp5' ? 'Cimento CP5' : 'Cimento Branco'}</p>
-                    <p><strong>Peso do Cimento:</strong> ${document.getElementById('pesoCimento').value} kg</p>
-                    <p><strong>Pigmentação:</strong> ${document.getElementById('pigmentacao').value}%</p>
-                    <p><strong>Mão de Obra:</strong> R$ ${document.getElementById('maoDeObra').value}</p>
+                // Criar HTML do PDF
+                let htmlContent = `
+                    <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+                        <h1 style="text-align: center; color: #1f4e78; margin-bottom: 30px;">Calculadora de Traço de Concreto CIMENZO</h1>
+                        
+                        <div style="margin-bottom: 30px; border: 1px solid #ddd; padding: 15px; border-radius: 5px;">
+                            <h3 style="color: #1f4e78; margin-bottom: 15px;">Informações da Peça</h3>
+                            <p><strong>Aplicação:</strong> ${proporcoes[aplicacao].nome}</p>
+                            <p><strong>Tipo de Cimento:</strong> ${document.getElementById('tipoCimento').value === 'cp5' ? 'Cimento CP5' : 'Cimento Branco'}</p>
+                            <p><strong>Peso do Cimento:</strong> ${document.getElementById('pesoCimento').value} kg</p>
+                            <p><strong>Pigmentação:</strong> ${document.getElementById('pigmentacao').value}%</p>
+                            <p><strong>Mão de Obra:</strong> R$ ${document.getElementById('maoDeObra').value}</p>
+                        </div>
+                        
+                        <div style="margin-bottom: 30px;">
+                            <h3 style="color: #1f4e78; margin-bottom: 15px;">Componentes</h3>
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <thead>
+                                    <tr style="background-color: #1f4e78; color: white;">
+                                        <th style="border: 1px solid #ddd; padding: 10px; text-align: left;">Componente</th>
+                                        <th style="border: 1px solid #ddd; padding: 10px; text-align: left;">Quantidade</th>
+                                        <th style="border: 1px solid #ddd; padding: 10px; text-align: left;">Unidade</th>
+                                        <th style="border: 1px solid #ddd; padding: 10px; text-align: left;">Preço Unit.</th>
+                                        <th style="border: 1px solid #ddd; padding: 10px; text-align: left;">Custo Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
                 `;
-                elemento.appendChild(info);
                 
-                // Adicionar tabela de resultados
-                const tabela = document.querySelector('.results-table');
+                // Adicionar linhas da tabela
+                const tabela = document.querySelector('.results-table tbody');
                 if (tabela) {
-                    const tabelaClone = tabela.cloneNode(true);
-                    elemento.appendChild(tabelaClone);
+                    tabela.querySelectorAll('tr').forEach(linha => {
+                        const colunas = linha.querySelectorAll('td');
+                        if (colunas.length === 5) {
+                            htmlContent += `
+                                <tr>
+                                    <td style="border: 1px solid #ddd; padding: 10px;">${colunas[0].textContent}</td>
+                                    <td style="border: 1px solid #ddd; padding: 10px;">${colunas[1].textContent}</td>
+                                    <td style="border: 1px solid #ddd; padding: 10px;">${colunas[2].textContent}</td>
+                                    <td style="border: 1px solid #ddd; padding: 10px;">${colunas[3].textContent}</td>
+                                    <td style="border: 1px solid #ddd; padding: 10px;">${colunas[4].textContent}</td>
+                                </tr>
+                            `;
+                        }
+                    });
                 }
                 
-                // Adicionar resumo
-                const resumo = document.createElement('div');
-                resumo.style.marginTop = '20px';
-                resumo.innerHTML = `
-                    <h3>Resumo de Custos</h3>
-                    <p><strong>Custo de Materiais:</strong> ${document.getElementById('custoMateriais').textContent}</p>
-                    <p><strong>Mão de Obra:</strong> ${document.getElementById('custoMaoDeObra').textContent}</p>
-                    <p><strong>Custo Total:</strong> ${document.getElementById('custoTotal').textContent}</p>
-                    <p><strong>Peso Total:</strong> ${document.getElementById('pesoTotal').textContent}</p>
-                    <p><strong>Custo por kg:</strong> ${document.getElementById('custoPorKg').textContent}</p>
+                htmlContent += `
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div style="margin-bottom: 30px; border: 1px solid #ddd; padding: 15px; border-radius: 5px; background-color: #f9f9f9;">
+                            <h3 style="color: #1f4e78; margin-bottom: 15px;">Resumo de Custos</h3>
+                            <p><strong>Custo de Materiais:</strong> ${document.getElementById('custoMateriais').textContent}</p>
+                            <p><strong>Mão de Obra:</strong> ${document.getElementById('custoMaoDeObra').textContent}</p>
+                            <p style="font-size: 18px; color: #d4af37;"><strong>Custo Total:</strong> ${document.getElementById('custoTotal').textContent}</p>
+                            <p><strong>Peso Total:</strong> ${document.getElementById('pesoTotal').textContent}</p>
+                            <p><strong>Custo por kg:</strong> ${document.getElementById('custoPorKg').textContent}</p>
+                        </div>
+                        
+                        <div style="text-align: center; color: #999; font-size: 12px; margin-top: 40px;">
+                            <p>Gerado em: ${new Date().toLocaleString('pt-BR')}</p>
+                            <p>CIMENZO - Revestimento Cimentício</p>
+                        </div>
+                    </div>
                 `;
-                elemento.appendChild(resumo);
+                
+                const element = document.createElement('div');
+                element.innerHTML = htmlContent;
                 
                 const opt = {
                     margin: 10,
                     filename: `Traco_Concreto_CIMENZO_${new Date().toISOString().slice(0, 10)}.pdf`,
                     image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { scale: 2 },
+                    html2canvas: { scale: 2, useCORS: true, logging: false },
                     jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
                 };
 
-                html2pdf().set(opt).from(elemento).save();
+                html2pdf().set(opt).from(element).save();
             } catch (erro) {
                 console.error('Erro ao salvar PDF:', erro);
                 alert('Erro ao salvar PDF. Tente novamente.');
