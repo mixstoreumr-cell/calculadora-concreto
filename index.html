@@ -1053,20 +1053,50 @@
             }
 
             try {
-                // Procurar pelo elemento de resultados
-                let elemento = document.querySelector('.results-section');
-                if (!elemento) {
-                    elemento = document.querySelector('table');
-                }
-                if (!elemento) {
-                    elemento = document.querySelector('.main-content');
+                // Criar um elemento temporário com os dados
+                const elemento = document.createElement('div');
+                elemento.style.padding = '20px';
+                elemento.style.backgroundColor = 'white';
+                
+                // Adicionar título
+                const titulo = document.createElement('h1');
+                titulo.textContent = 'Calculadora de Traço de Concreto CIMENZO';
+                titulo.style.textAlign = 'center';
+                titulo.style.marginBottom = '20px';
+                elemento.appendChild(titulo);
+                
+                // Adicionar informações
+                const info = document.createElement('div');
+                info.style.marginBottom = '20px';
+                info.innerHTML = `
+                    <p><strong>Aplicação:</strong> ${proporcoes[aplicacao].nome}</p>
+                    <p><strong>Tipo de Cimento:</strong> ${document.getElementById('tipoCimento').value === 'cp5' ? 'Cimento CP5' : 'Cimento Branco'}</p>
+                    <p><strong>Peso do Cimento:</strong> ${document.getElementById('pesoCimento').value} kg</p>
+                    <p><strong>Pigmentação:</strong> ${document.getElementById('pigmentacao').value}%</p>
+                    <p><strong>Mão de Obra:</strong> R$ ${document.getElementById('maoDeObra').value}</p>
+                `;
+                elemento.appendChild(info);
+                
+                // Adicionar tabela de resultados
+                const tabela = document.querySelector('.results-table');
+                if (tabela) {
+                    const tabelaClone = tabela.cloneNode(true);
+                    elemento.appendChild(tabelaClone);
                 }
                 
-                if (!elemento) {
-                    alert('Nenhum resultado para salvar. Faça um cálculo primeiro!');
-                    return;
-                }
-
+                // Adicionar resumo
+                const resumo = document.createElement('div');
+                resumo.style.marginTop = '20px';
+                resumo.innerHTML = `
+                    <h3>Resumo de Custos</h3>
+                    <p><strong>Custo de Materiais:</strong> ${document.getElementById('custoMateriais').textContent}</p>
+                    <p><strong>Mão de Obra:</strong> ${document.getElementById('custoMaoDeObra').textContent}</p>
+                    <p><strong>Custo Total:</strong> ${document.getElementById('custoTotal').textContent}</p>
+                    <p><strong>Peso Total:</strong> ${document.getElementById('pesoTotal').textContent}</p>
+                    <p><strong>Custo por kg:</strong> ${document.getElementById('custoPorKg').textContent}</p>
+                `;
+                elemento.appendChild(resumo);
+                
                 const opt = {
                     margin: 10,
                     filename: `Traco_Concreto_CIMENZO_${new Date().toISOString().slice(0, 10)}.pdf`,
@@ -1113,6 +1143,19 @@
             }
 
             try {
+                // Verificar se há resultados
+                const tabela = document.querySelector('.results-table tbody');
+                if (!tabela || tabela.children.length === 0) {
+                    alert('Nenhum resultado para exportar. Faça um cálculo primeiro!');
+                    return;
+                }
+                
+                // Verificar se a primeira linha é a mensagem padrão
+                if (tabela.children[0].textContent.includes('Selecione uma aplicação')) {
+                    alert('Nenhum resultado para exportar. Faça um cálculo primeiro!');
+                    return;
+                }
+
                 // Preparar dados
                 const dados = [];
                 dados.push(['CALCULADORA DE TRAÇO DE CONCRETO - CIMENZO']);
@@ -1126,21 +1169,23 @@
                 dados.push(['']);
                 dados.push(['Componente', 'Quantidade', 'Unidade', 'Preço Unit. (R$)', 'Custo Total (R$)']);
 
-                // Adicionar resultados
-                const precos = carregarPrecos();
+                // Adicionar resultados da tabela
+                const linhas = tabela.querySelectorAll('tr');
                 let custoTotal = 0;
-
-                if (ultimosResultados && ultimosResultados.length > 0) {
-                    ultimosResultados.forEach(item => {
-                        const preco = precos[item.precoId] || 0;
-                        const custo = item.quantidade * preco;
+                
+                linhas.forEach(linha => {
+                    const colunas = linha.querySelectorAll('td');
+                    if (colunas.length === 5) {
+                        const componente = colunas[0].textContent.trim();
+                        const quantidade = parseFloat(colunas[1].textContent.trim());
+                        const unidade = colunas[2].textContent.trim();
+                        const preco = parseFloat(colunas[3].textContent.replace('R$', '').trim());
+                        const custo = parseFloat(colunas[4].textContent.replace('R$', '').trim());
+                        
+                        dados.push([componente, quantidade.toFixed(2), unidade, preco.toFixed(2), custo.toFixed(2)]);
                         custoTotal += custo;
-                        dados.push([item.nome, item.quantidade.toFixed(2), item.unidade, preco.toFixed(2), custo.toFixed(2)]);
-                    });
-                } else {
-                    alert('Nenhum resultado para exportar. Faça um cálculo primeiro!');
-                    return;
-                }
+                    }
+                });
 
                 dados.push(['TOTAL DE MATERIAIS', '', '', '', custoTotal.toFixed(2)]);
                 dados.push(['Mão de Obra', '', '', '', maoDeObra]);
@@ -1153,6 +1198,7 @@
 
                 // Salvar arquivo
                 XLSX.writeFile(wb, `Traco_Concreto_CIMENZO_${new Date().toISOString().slice(0, 10)}.xlsx`);
+                alert('Arquivo Excel exportado com sucesso!');
             } catch (erro) {
                 console.error('Erro ao exportar Excel:', erro);
                 alert('Erro ao exportar Excel. Tente novamente.');
