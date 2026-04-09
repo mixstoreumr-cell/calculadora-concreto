@@ -94,6 +94,12 @@
             margin-bottom: 30px;
         }
 
+        .main-content-single {
+            display: block;
+            margin-bottom: 30px;
+            width: 100%;
+        }
+
         .main-content.centered {
             grid-template-columns: 1fr;
             max-width: 600px;
@@ -508,8 +514,8 @@
 
         <!-- ABA 1: CALCULADORA -->
         <div id="calculadora" class="main-tab-content active">
-            <div class="main-content centered">
-                <!-- Seção de Entrada de Dados (Centralizada) -->
+            <!-- Seção de Entrada de Dados (Centralizada) -->
+            <div class="main-content-single">
                 <div class="card">
                     <h2>Entrada de Dados</h2>
                     
@@ -559,8 +565,8 @@
                 </div>
             </div>
 
-            <div class="main-content">
-                <!-- Seção de Resultados -->
+            <!-- Seção de Resultados -->
+            <div class="main-content-single">
                 <div class="card results-section">
                     <h2>Resultados do Cálculo</h2>
                     
